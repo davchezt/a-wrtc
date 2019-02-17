@@ -1,0 +1,119 @@
+<ion-content>
+  <div padding class="call-container">
+    <div #bottomBar class="bottom-bar">
+      <h1 ion-text *ngIf="isCalling && !isStreming" color="primary">CALLING</h1>
+      <h1 ion-text *ngIf="isIncommingCall" color="primary">INCOMMING CALL</h1>
+      <h1 ion-text *ngIf="timeCounter" color="light" class="timer">
+        <ion-grid no-padding>
+          <ion-row>
+            <ion-col ion-text text-left>
+              <button ion-button clear color="secondary" (click)="switchAudio()"
+                [color]="isMuted ? 'danger':'secondary'">
+                <ion-icon [name]="isMuted ? 'ios-mic-off-outline':'ios-mic'"></ion-icon>
+              </button>
+            </ion-col>
+            <ion-col ion-text text-right>
+              {{ timeCounter }}
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </h1>
+
+      <div class="message-input" *ngIf="isStreming">
+        <form (ngSubmit)="sendMessage()">
+          <ion-list>
+            <ion-item>
+              <ion-input #messageInput type="text" placeholder="tuliskan pesan anda..." [(ngModel)]="chatMessage" name="message"></ion-input>
+            </ion-item>
+          </ion-list>
+        </form>
+      </div>
+
+      <ion-grid class="button-group">
+        <ion-row>
+          <ion-col col-4>
+            <button *ngIf="isInitiator" ion-button block outline color="secondary" [disabled]="isCalling || isStreming"
+              (click)="startCall()">
+              <ion-icon name="ios-videocam-outline"></ion-icon>
+            </button>
+            <button *ngIf="!isInitiator" ion-button block outline color="secondary"
+              [disabled]="isStreming || !isIncommingCall" (click)="acceptCall()">
+              <ion-icon name="ios-videocam-outline"></ion-icon>
+            </button>
+          </ion-col>
+          <ion-col col-4>
+            <ion-grid no-padding>
+              <ion-row>
+                <ion-col [class.anim]="sendingHeart">
+                  <button ion-button block outline color="primary" [disabled]="!isStreming || sendingHeart"
+                    (click)="toggleHeart()">
+                    <ion-icon name="ios-heart-outline"></ion-icon>
+                  </button>
+                </ion-col>
+                <ion-col [class.anim]="sendingThumb">
+                  <button ion-button block outline color="primary" [disabled]="!isStreming || sendingThumb"
+                    (click)="toggleThumb()">
+                    <ion-icon name="ios-thumbs-up-outline"></ion-icon>
+                  </button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-col>
+          <ion-col col-4>
+            <button *ngIf="isInitiator" ion-button block outline color="danger" [disabled]="!isCalling"
+              (click)="endCall()">
+              <ion-icon name="ios-videocam-outline"></ion-icon>
+            </button>
+            <button *ngIf="!isInitiator && isIncommingCall" ion-button block outline color="danger"
+              [disabled]="!isIncommingCall" (click)="rejectCall()">
+              <ion-icon name="ios-videocam-outline"></ion-icon>
+            </button>
+            <button *ngIf="!isInitiator && !isIncommingCall" ion-button block outline color="danger"
+              [disabled]="!isStreming" (click)="endCall()">
+              <ion-icon name="ios-videocam-outline"></ion-icon>
+            </button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
+  </div>
+
+  <div class="video-container">
+    <video #remoteVideo poster="assets/imgs/video-bg.png" id="remoteVideo"></video>
+  </div>
+
+  <div class="chat-container" #chatContainer *ngIf="isStreming && messageChat.length !== 0">
+    <div *ngFor="let msg of messageChat">
+      <h6 ion-text text-right color="secondary" *ngIf="msg.startsWith('saya:')">{{ formatMessage(msg) }}</h6>
+      <h6 ion-text color="primary" *ngIf="!msg.startsWith('saya:')"><ion-icon name="ios-text-outline"></ion-icon> {{ msg }}</h6>
+    </div>
+  </div>
+
+  <div class="local-video" [class.hidden]="!isCalling && isInitiator || !isInitiator && !isStreming">
+    <video #localVideo poster="assets/imgs/video-bg.png" id="localVideo"></video>
+  </div>
+
+  <div class="camera-switch">
+    <ion-item no-lines class="camera">
+      <button ion-button clear (click)="switchVideo()" [disabled]="!canSwitchCamera">
+        <ion-icon name="ios-reverse-camera-outline"></ion-icon>
+      </button>
+    </ion-item>
+  </div>
+
+  <div class="content-center" *ngIf="isCalling && !isStreming || isIncommingCall || heartShow || thumbShow">
+    <ion-icon *ngIf="isCalling && !heartShow && !thumbShow || isIncommingCall" name="ios-alert-outline" color="primary">
+    </ion-icon>
+    <ion-icon *ngIf="heartShow" name="ios-heart-outline" color="danger"></ion-icon>
+    <ion-icon *ngIf="thumbShow" name="ios-thumbs-up-outline" color="secondary"></ion-icon>
+  </div>
+
+  <div class="time-info">
+    <ion-item no-lines>
+      <ion-toggle checked="false" [(ngModel)]="isInitiator" [disabled]="isCalling || isIncommingCall || isStreming">
+      </ion-toggle>
+    </ion-item>
+    {{ timeClock }}
+  </div>
+
+</ion-content>
