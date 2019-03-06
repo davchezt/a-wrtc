@@ -73,12 +73,12 @@ export class HomePage {
 
   constructor(
     public navCtrl: NavController,
-    public socket: Socket, 
+    private socket: Socket, 
     private androidPermissions: AndroidPermissions,
     private platform: Platform,
     // private localNotifications: LocalNotifications,
     private helper: HelpersProvider,
-    public loadingCtrl: LoadingController,
+    private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
     private alrtCtrl: AlertController
   ) {
@@ -121,11 +121,10 @@ export class HomePage {
       this.cameraStream = stream;
       this.localVideo.nativeElement.srcObject = this.cameraStream;
       this.localVideo.nativeElement.muted = true;
-      // this.localVideo.nativeElement.onclick = (e) => this.localVideo.nativeElement.webkitRequestFullscreen();
       this.localVideo.nativeElement.onloadedmetadata = (e) => {
         if (this.isInitiator) {
           this.isCalling = true;
-          this.startOutAudio();
+          // this.startOutAudio();
           this.openPeer();
         }
         else {
@@ -159,8 +158,7 @@ export class HomePage {
       this.localVideo.nativeElement.pause();
       this.localVideo.nativeElement.srcObject = this.cameraStream;
       this.localVideo.nativeElement.muted = true;
-      // this.localVideo.nativeElement.onclick = (e) => this.localVideo.nativeElement.webkitRequestFullscreen();
-      this.localVideo.nativeElement.onloadedmetadata = (e) => {   
+      this.localVideo.nativeElement.onloadedmetadata = (e) => {
         this.canSwitchCamera = true;
         this.localVideo.nativeElement.play();
         this.hideLoading();
@@ -168,7 +166,7 @@ export class HomePage {
     };
     const handleError = async (error: any) => {
       this.canSwitchCamera = true;
-      this.hideLoading();
+      await this.hideLoading();
       console.log('navigator.getUserMedia error: ' + error.name + ', ' + error.message);
     };
 
@@ -250,7 +248,7 @@ export class HomePage {
   }
 
   async endCall() {
-    await this.stopOutAudio();
+    // await this.stopOutAudio();
     await this.closeUserMedia();
     await this.closePeer();
     this.isCalling = false;
@@ -261,13 +259,13 @@ export class HomePage {
   }
 
   async incommingCall() {
-    this.startInAudio();
+    // this.startInAudio();
     this.isIncommingCall = true;
     // console.log(this.targetPeer);
   }
 
   async incommingCallEnded() {
-    this.stopInAudio();
+    // this.stopInAudio();
     this.isIncommingCall = false;
   }
 
@@ -351,15 +349,12 @@ export class HomePage {
       console.log('peer:stream', stream);
       this.isStreming = true;
       this.remoteVideo.nativeElement.srcObject = stream;
-      // this.remoteVideo.nativeElement.onloadedmetadata = (e) => this.remoteVideo.nativeElement.play();
       this.remoteVideo.nativeElement.play();
     });
     this.Peer.on('negotiate', (data) => {
       console.log("peer:negotiate");
     });
     this.Peer.on('track', (track, streams) => {
-      // console.log('track', track);
-      // console.log('track:stream', stream);
       this.remoteStream = streams;
       console.log('peer:track:stream');
     });
@@ -399,7 +394,6 @@ export class HomePage {
   }
 
   async swapPeer() {
-    // console.log('local stream:', this.cameraStream);
     this.newUserMedia();
   }
 
@@ -524,6 +518,7 @@ export class HomePage {
   on(name) {
     let observable = new Observable(observer => {
       this.socket.on(name, (data) => {
+        console.log('name:', name);
         observer.next(data);
       });
     })
